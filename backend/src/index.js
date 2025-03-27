@@ -1,13 +1,21 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const path = require('path');
-const fs = require('fs');
-const routes = require('./routes');
-const { errorHandler, notFound } = require('./middleware/errorMiddleware');
-const { initializeScheduler } = require('./config/scheduler');
-const config = require('./config/config');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+import routes from './routes/index.js';
+import { errorHandler, notFound } from './middleware/errorMiddleware.js';
+import { initializeScheduler } from './config/scheduler.js';
+import config from './config/config.js';
+import userRoutes from './routes/userRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import appointmentRoutes from './routes/appointmentRoutes.js';
+import imageRoutes from './routes/imageRoutes.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -44,12 +52,10 @@ mongoose.connect(config.mongodbUri)
     initializeScheduler();
     
     // Rutas
-    app.use('/api/users', require('./routes/userRoutes'));
-    app.use('/api/products', require('./routes/productRoutes'));
-    app.use('/api/appointments', require('./routes/appointmentRoutes'));
-    app.use('/api/images', require('./routes/imageRoutes'));
-    app.use('/api/cleanup', require('./routes/cleanupRoutes'));
-    app.use('/api/scheduler', require('./routes/schedulerRoutes'));
+    app.use('/api/users', userRoutes);
+    app.use('/api/products', productRoutes);
+    app.use('/api/appointments', appointmentRoutes);
+    app.use('/api/images', imageRoutes);
 
     // Ruta de prueba
     app.get('/', (req, res) => {
@@ -57,12 +63,12 @@ mongoose.connect(config.mongodbUri)
     });
 
     // Iniciar servidor
-    const PORT = config.port;
+    const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
   .catch((error) => {
-    console.error('MongoDB connection error:', error);
+    console.error('Error connecting to MongoDB:', error);
     process.exit(1);
   }); 
