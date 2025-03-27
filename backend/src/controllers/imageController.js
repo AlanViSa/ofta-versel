@@ -30,7 +30,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 // @desc    Subir una imagen
 // @route   POST /api/images/upload
 // @access  Private
-export const uploadImage = async (req, res, next) => {
+const uploadImage = async (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ 
@@ -93,7 +93,7 @@ export const uploadImage = async (req, res, next) => {
 // @desc    Eliminar una imagen
 // @route   DELETE /api/images/:filename
 // @access  Private
-export const deleteImage = async (req, res, next) => {
+const deleteImage = async (req, res, next) => {
   try {
     const { filename } = req.params;
     const image = await Image.findOne({ publicId: filename });
@@ -125,7 +125,7 @@ export const deleteImage = async (req, res, next) => {
 // @desc    Obtener todas las imágenes
 // @route   GET /api/images
 // @access  Private
-export const getImages = async (req, res, next) => {
+const getImages = async (req, res, next) => {
   try {
     // Intentar obtener de caché
     const cachedImages = await getImageListFromCache();
@@ -150,7 +150,7 @@ export const getImages = async (req, res, next) => {
 // @desc    Transformar una imagen
 // @route   POST /api/images/:publicId/transform
 // @access  Private
-export const transformImage = async (req, res, next) => {
+const transformImage = async (req, res, next) => {
   try {
     const { publicId } = req.params;
     const { transformations } = req.body;
@@ -221,7 +221,7 @@ const addWatermark = async (req, res) => {
 // @desc    Obtener configuraciones de transformación
 // @route   GET /api/images/transform-configs
 // @access  Private
-export const getTransformConfigs = (req, res) => {
+const getTransformConfigs = (req, res) => {
   res.json({ success: true, data: transformConfigs });
 };
 
@@ -232,5 +232,6 @@ export {
   transformImage,
   applyImageEffects,
   createImageVariants,
-  addWatermark
+  addWatermark,
+  getTransformConfigs
 }; 
