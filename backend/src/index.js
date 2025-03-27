@@ -45,8 +45,6 @@ app.use(errorHandler);
 
 // Opciones de conexión a MongoDB
 const mongooseOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
 };
