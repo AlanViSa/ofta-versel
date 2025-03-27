@@ -1,7 +1,7 @@
 import axios from 'axios';
-import Image from '../models/Image';
-import cloudinary from '../config/cloudinary';
-import * as imageTransformUtils from '../utils/imageTransformUtils';
+import Image from '../models/imageModel.js';
+import cloudinary from '../config/cloudinary.js';
+import * as imageTransformUtils from '../utils/imageTransformUtils.js';
 
 const API_URL = '/api/images';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -11,7 +11,7 @@ export const imageService = {
   // Obtener todas las imágenes
   getAllImages: async () => {
     try {
-      return await Image.getAllImages();
+      return await Image.find({ active: true }).sort('-createdAt');
     } catch (error) {
       console.error('Error getting all images:', error);
       throw error;
@@ -30,17 +30,21 @@ export const imageService = {
       }
 
       const result = await cloudinary.uploader.upload(file.buffer, {
-        resource_type: 'auto'
+        resource_type: 'auto',
+        folder: 'oftalmologia'
       });
 
       const image = await Image.create({
-        filename: file.originalname,
+        publicId: result.public_id,
         url: result.secure_url,
-        size: file.size,
-        format: result.format
+        filename: file.originalname,
+        format: result.format,
+        width: result.width,
+        height: result.height,
+        size: result.bytes
       });
 
-      return image.toResponse();
+      return image;
     } catch (error) {
       console.error('Error uploading image:', error);
       throw error;
@@ -48,18 +52,17 @@ export const imageService = {
   },
 
   // Eliminar una imagen
-  deleteImage: async (imageId) => {
+  deleteImage: async (id) => {
     try {
-      const image = await Image.findById(imageId);
+      const image = await Image.findById(id);
       if (!image) {
         throw new Error('Image not found');
       }
 
-      const publicId = image.url.split('/').pop().split('.')[0];
-      await cloudinary.uploader.destroy(publicId);
-      await Image.findByIdAndDelete(imageId);
+      await cloudinary.uploader.destroy(image.publicId);
+      await image.deleteOne();
 
-      return { success: true };
+      return { message: 'Imagen eliminada correctamente' };
     } catch (error) {
       console.error('Error deleting image:', error);
       throw error;
@@ -67,26 +70,15 @@ export const imageService = {
   },
 
   // Transformar una imagen
-  transformImage: async (imageId, transformations) => {
+  transformImage: async (id, transformations) => {
     try {
-      const image = await Image.findById(imageId);
+      const image = await Image.findById(id);
       if (!image) {
         throw new Error('Image not found');
       }
 
-      // Validar que solo se transformen ancho y alto
-      if (Object.keys(transformations).some(key => !['width', 'height'].includes(key))) {
-        throw new Error('Solo se permiten transformaciones de ancho y alto');
-      }
-
-      const publicId = image.url.split('/').pop().split('.')[0];
-      const result = await imageTransformUtils.transformImage(publicId, transformations);
-      
-      // Actualizar la URL de la imagen en la base de datos
-      image.url = result.url;
-      await image.save();
-
-      return image.toResponse();
+      const result = await imageTransformUtils.applyTransformations(image.publicId, transformations);
+      return result;
     } catch (error) {
       console.error('Error transforming image:', error);
       throw error;
