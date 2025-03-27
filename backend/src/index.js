@@ -38,6 +38,15 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Rutas
 app.use('/api', routes);
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/images', imageRoutes);
+
+// Ruta de prueba
+app.get('/', (req, res) => {
+  res.json({ message: 'API is running' });
+});
 
 // Manejo de errores
 app.use(notFound);
@@ -57,17 +66,6 @@ mongoose.connect(config.mongodbUri, mongooseOptions)
     // Inicializar el programador de tareas
     initializeScheduler();
     
-    // Rutas
-    app.use('/api/users', userRoutes);
-    app.use('/api/products', productRoutes);
-    app.use('/api/appointments', appointmentRoutes);
-    app.use('/api/images', imageRoutes);
-
-    // Ruta de prueba
-    app.get('/', (req, res) => {
-      res.json({ message: 'API is running' });
-    });
-
     // Iniciar servidor
     const PORT = config.port;
     app.listen(PORT, () => {
