@@ -176,7 +176,7 @@ export const transformImage = async (req, res, next) => {
 // @desc    Aplicar efectos a una imagen
 // @route   POST /api/images/:publicId/effects
 // @access  Private
-export const applyImageEffects = async (req, res) => {
+const applyImageEffects = async (req, res) => {
   try {
     const { publicId } = req.params;
     const { effects } = req.body;
