@@ -1,17 +1,46 @@
 import { useState } from 'react';
+import axios from 'axios';
 
 const Contacto = () => {
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
     telefono: '',
+    fecha: '',
+    hora: '',
+    tipoConsulta: '',
     mensaje: ''
   });
 
-  const handleSubmit = (e) => {
+  const [status, setStatus] = useState({
+    loading: false,
+    error: null,
+    success: false
+  });
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí irá la lógica para enviar el formulario
-    console.log('Datos del formulario:', formData);
+    setStatus({ loading: true, error: null, success: false });
+
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/appointments`, formData);
+      setStatus({ loading: false, error: null, success: true });
+      setFormData({
+        nombre: '',
+        email: '',
+        telefono: '',
+        fecha: '',
+        hora: '',
+        tipoConsulta: '',
+        mensaje: ''
+      });
+    } catch (error) {
+      setStatus({
+        loading: false,
+        error: error.response?.data?.message || 'Error al agendar la cita',
+        success: false
+      });
+    }
   };
 
   const handleChange = (e) => {
@@ -28,22 +57,32 @@ const Contacto = () => {
         {/* Encabezado de la sección */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-display font-bold text-primary mb-4">
-            Contáctanos
+            Agenda tu Cita
           </h2>
           <div className="w-24 h-1 bg-accent mx-auto rounded-full"></div>
           <p className="mt-6 text-lg text-secondary max-w-2xl mx-auto">
-            Estamos aquí para ayudarte. Contáctanos para agendar tu consulta o resolver 
-            cualquier duda que tengas sobre nuestros servicios.
+            Completa el formulario para agendar tu consulta. Nos pondremos en contacto contigo 
+            para confirmar tu cita.
           </p>
         </div>
 
         {/* Grid superior con formulario e información de contacto */}
         <div className="grid md:grid-cols-2 gap-12 mb-12">
-          {/* Formulario de contacto - Lado izquierdo */}
+          {/* Formulario de cita - Lado izquierdo */}
           <div>
             <h3 className="text-2xl font-display font-semibold text-primary mb-6 text-center md:text-left">
-              Envíanos un Mensaje
+              Formulario de Cita
             </h3>
+            {status.success && (
+              <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md">
+                ¡Tu cita ha sido agendada exitosamente! Nos pondremos en contacto contigo pronto.
+              </div>
+            )}
+            {status.error && (
+              <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md">
+                {status.error}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
@@ -86,12 +125,65 @@ const Contacto = () => {
                   value={formData.telefono}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-accent focus:ring-accent bg-white"
+                  required
                 />
               </div>
 
               <div>
+                <label htmlFor="fecha" className="block text-sm font-medium text-gray-700">
+                  Fecha de la cita
+                </label>
+                <input
+                  type="date"
+                  name="fecha"
+                  id="fecha"
+                  value={formData.fecha}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-accent focus:ring-accent bg-white"
+                  required
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="hora" className="block text-sm font-medium text-gray-700">
+                  Hora de la cita
+                </label>
+                <input
+                  type="time"
+                  name="hora"
+                  id="hora"
+                  value={formData.hora}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-accent focus:ring-accent bg-white"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="tipoConsulta" className="block text-sm font-medium text-gray-700">
+                  Tipo de consulta
+                </label>
+                <select
+                  name="tipoConsulta"
+                  id="tipoConsulta"
+                  value={formData.tipoConsulta}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-accent focus:ring-accent bg-white"
+                  required
+                >
+                  <option value="">Selecciona un tipo de consulta</option>
+                  <option value="consultaGeneral">Consulta General</option>
+                  <option value="examenOcular">Examen Ocular</option>
+                  <option value="lentes">Adaptación de Lentes</option>
+                  <option value="urgente">Consulta Urgente</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+
+              <div>
                 <label htmlFor="mensaje" className="block text-sm font-medium text-gray-700">
-                  Mensaje
+                  Mensaje adicional (opcional)
                 </label>
                 <textarea
                   name="mensaje"
@@ -100,16 +192,18 @@ const Contacto = () => {
                   value={formData.mensaje}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-accent focus:ring-accent bg-white"
-                  required
                 ></textarea>
               </div>
 
               <div>
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-secondary transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  disabled={status.loading}
+                  className={`w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-secondary transition-all duration-300 transform hover:scale-105 cursor-pointer ${
+                    status.loading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
-                  Enviar Mensaje
+                  {status.loading ? 'Agendando...' : 'Agendar Cita'}
                 </button>
               </div>
             </form>

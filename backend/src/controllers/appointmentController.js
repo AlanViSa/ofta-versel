@@ -5,13 +5,40 @@ import Appointment from '../models/Appointment.js';
 // @access  Public
 export const createAppointment = async (req, res) => {
   try {
-    const appointment = await Appointment.create({
-      ...req.body,
-      createdBy: req.user ? req.user._id : null
+    // Transformar los datos del formulario al formato del modelo
+    const appointmentData = {
+      patient: {
+        name: req.body.nombre,
+        email: req.body.email,
+        phone: req.body.telefono
+      },
+      date: new Date(req.body.fecha),
+      time: req.body.hora,
+      type: req.body.tipoConsulta,
+      notes: req.body.mensaje,
+      status: 'pending'
+    };
+
+    const appointment = await Appointment.create(appointmentData);
+    
+    // Enviar respuesta exitosa
+    res.status(201).json({
+      message: 'Cita agendada exitosamente',
+      appointment: {
+        id: appointment._id,
+        patient: appointment.patient,
+        date: appointment.date,
+        time: appointment.time,
+        type: appointment.type,
+        status: appointment.status
+      }
     });
-    res.status(201).json(appointment);
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear cita', error: error.message });
+    console.error('Error al crear cita:', error);
+    res.status(500).json({ 
+      message: 'Error al crear cita', 
+      error: error.message 
+    });
   }
 };
 

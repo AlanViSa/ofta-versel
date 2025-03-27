@@ -29,7 +29,7 @@ const appointmentSchema = new mongoose.Schema({
   type: {
     type: String,
     required: [true, 'El tipo de cita es requerido'],
-    enum: ['consulta', 'examen', 'ajuste', 'otro']
+    enum: ['consultaGeneral', 'examenOcular', 'lentes', 'urgente', 'otro']
   },
   status: {
     type: String,
