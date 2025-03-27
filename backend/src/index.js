@@ -8,7 +8,7 @@ import fs from 'fs';
 import routes from './routes/index.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 import { initializeScheduler } from './config/scheduler.js';
-import config from './config/config.js';
+import { config } from './config/config.js';
 import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
