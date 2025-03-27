@@ -22,8 +22,23 @@ const Contacto = () => {
     e.preventDefault();
     setStatus({ loading: true, error: null, success: false });
 
+    // Validar que todos los campos requeridos estén presentes
+    const requiredFields = ['nombre', 'email', 'telefono', 'fecha', 'hora', 'tipoConsulta'];
+    const missingFields = requiredFields.filter(field => !formData[field]);
+    
+    if (missingFields.length > 0) {
+      setStatus({
+        loading: false,
+        error: `Por favor, completa los siguientes campos: ${missingFields.join(', ')}`,
+        success: false
+      });
+      return;
+    }
+
     try {
+      console.log('Enviando datos:', formData); // Log para debugging
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/appointments`, formData);
+      console.log('Respuesta del servidor:', response.data); // Log para debugging
       setStatus({ loading: false, error: null, success: true });
       setFormData({
         nombre: '',
@@ -35,6 +50,7 @@ const Contacto = () => {
         mensaje: ''
       });
     } catch (error) {
+      console.error('Error completo:', error); // Log para debugging
       setStatus({
         loading: false,
         error: error.response?.data?.message || 'Error al agendar la cita',
