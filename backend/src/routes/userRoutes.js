@@ -1,13 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const { 
+import express from 'express';
+import { 
   registerUser, 
   loginUser, 
   getUserProfile, 
   updateUserProfile 
-} = require('../controllers/userController');
-const { protect } = require('../middleware/authMiddleware');
-const { validate, validateRegister } = require('../middleware/validateMiddleware');
+} from '../controllers/userController.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { validate, validateRegister } from '../middleware/validateMiddleware.js';
+
+const router = express.Router();
 
 // Rutas públicas
 router.post('/register', validateRegister, validate, registerUser);
@@ -17,4 +18,4 @@ router.post('/login', loginUser);
 router.get('/profile', protect, getUserProfile);
 router.put('/profile', protect, updateUserProfile);
 
-module.exports = router; 
+export default router; 

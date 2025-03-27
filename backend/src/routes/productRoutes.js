@@ -1,14 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const {
+import express from 'express';
+import {
   getProducts,
   getProductById,
   createProduct,
   updateProduct,
   deleteProduct
-} = require('../controllers/productController');
-const { protect, admin } = require('../middleware/authMiddleware');
-const { validate, validateProduct } = require('../middleware/validateMiddleware');
+} from '../controllers/productController.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
+import { validate, validateProduct } from '../middleware/validateMiddleware.js';
+
+const router = express.Router();
 
 // Rutas públicas
 router.get('/', getProducts);
@@ -19,4 +20,4 @@ router.post('/', protect, admin, validateProduct, validate, createProduct);
 router.put('/:id', protect, admin, validateProduct, validate, updateProduct);
 router.delete('/:id', protect, admin, deleteProduct);
 
-module.exports = router; 
+export default router; 

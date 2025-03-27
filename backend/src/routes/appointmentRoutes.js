@@ -1,14 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const {
+import express from 'express';
+import {
   createAppointment,
   getAppointments,
   getAppointmentById,
   updateAppointment,
   cancelAppointment
-} = require('../controllers/appointmentController');
-const { protect, admin } = require('../middleware/authMiddleware');
-const { validate, validateAppointment } = require('../middleware/validateMiddleware');
+} from '../controllers/appointmentController.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
+import { validate, validateAppointment } from '../middleware/validateMiddleware.js';
+
+const router = express.Router();
 
 // Rutas públicas
 router.post('/', validateAppointment, validate, createAppointment);
@@ -19,4 +20,4 @@ router.get('/:id', protect, getAppointmentById);
 router.put('/:id', protect, admin, validateAppointment, validate, updateAppointment);
 router.put('/:id/cancel', protect, cancelAppointment);
 
-module.exports = router; 
+export default router; 

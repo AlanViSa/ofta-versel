@@ -1,8 +1,7 @@
-const express = require('express');
-const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
-const upload = require('../middleware/fileMiddleware');
-const {
+import express from 'express';
+import { protect } from '../middleware/authMiddleware.js';
+import upload from '../middleware/fileMiddleware.js';
+import {
   uploadImage,
   deleteImage,
   getImages,
@@ -11,7 +10,9 @@ const {
   createImageVariants,
   addWatermark,
   getTransformConfigs
-} = require('../controllers/imageController');
+} from '../controllers/imageController.js';
+
+const router = express.Router();
 
 // Rutas protegidas que requieren autenticación
 router.use(protect);
@@ -28,4 +29,4 @@ router.post('/:publicId/variants', createImageVariants);
 router.post('/:publicId/watermark', addWatermark);
 router.get('/transform-configs', getTransformConfigs);
 
-module.exports = router; 
+export default router; 
