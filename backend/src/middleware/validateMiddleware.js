@@ -1,7 +1,7 @@
-const { validationResult } = require('express-validator');
+import { validationResult } from 'express-validator';
 
 // @desc    Middleware para validar los resultados de express-validator
-const validate = (req, res, next) => {
+export const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -10,7 +10,7 @@ const validate = (req, res, next) => {
 };
 
 // @desc    Validaciones para registro de usuario
-const validateRegister = [
+export const validateRegister = [
   {
     field: 'name',
     rules: [
@@ -35,7 +35,7 @@ const validateRegister = [
 ];
 
 // @desc    Validaciones para creación de producto
-const validateProduct = [
+export const validateProduct = [
   {
     field: 'name',
     rules: [
@@ -108,9 +108,4 @@ const validateAppointment = [
   }
 ];
 
-module.exports = {
-  validate,
-  validateRegister,
-  validateProduct,
-  validateAppointment
-}; 
+export { validateAppointment }; 

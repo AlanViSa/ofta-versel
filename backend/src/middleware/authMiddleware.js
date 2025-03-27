@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
+import User from '../models/User.js';
 
 // @desc    Verificar token JWT y agregar usuario a req
 export const protect = async (req, res, next) => {
@@ -50,7 +50,7 @@ export const isOwnerOrAdmin = (req, res, next) => {
     next();
   } else {
     return res.status(403).json({
-      message: 'No autorizado'
+      message: 'No autorizado, solo el propietario o administradores'
     });
   }
 };
