@@ -1,5 +1,5 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+import User from '../models/User.js';
+import jwt from 'jsonwebtoken';
 
 // Generar JWT
 const generateToken = (userId) => {
@@ -11,7 +11,7 @@ const generateToken = (userId) => {
 // @desc    Registrar un nuevo usuario
 // @route   POST /api/users/register
 // @access  Public
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -45,29 +45,23 @@ const registerUser = async (req, res) => {
 // @desc    Autenticar usuario
 // @route   POST /api/users/login
 // @access  Public
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     // Buscar usuario
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
+    if (user && (await user.matchPassword(password))) {
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        token: generateToken(user._id)
+      });
+    } else {
+      res.status(401).json({ message: 'Email o contraseña incorrectos' });
     }
-
-    // Verificar contraseña
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
-    }
-
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      token: generateToken(user._id)
-    });
   } catch (error) {
     res.status(500).json({ message: 'Error al iniciar sesión', error: error.message });
   }
@@ -76,7 +70,7 @@ const loginUser = async (req, res) => {
 // @desc    Obtener perfil de usuario
 // @route   GET /api/users/profile
 // @access  Private
-const getUserProfile = async (req, res) => {
+export const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (user) {
@@ -97,7 +91,7 @@ const getUserProfile = async (req, res) => {
 // @desc    Actualizar perfil de usuario
 // @route   PUT /api/users/profile
 // @access  Private
-const updateUserProfile = async (req, res) => {
+export const updateUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (user) {
@@ -121,11 +115,4 @@ const updateUserProfile = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error al actualizar perfil', error: error.message });
   }
-};
-
-module.exports = {
-  registerUser,
-  loginUser,
-  getUserProfile,
-  updateUserProfile
 }; 
