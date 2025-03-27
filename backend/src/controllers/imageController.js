@@ -232,6 +232,5 @@ export {
   transformImage,
   applyImageEffects,
   createImageVariants,
-  addWatermark,
-  getTransformConfigs
+  addWatermark
 }; 
