@@ -1,9 +1,9 @@
-const Product = require('../models/Product');
+import Product from '../models/Product.js';
 
 // @desc    Obtener todos los productos
 // @route   GET /api/products
 // @access  Public
-const getProducts = async (req, res) => {
+export const getProducts = async (req, res) => {
   try {
     const { category, search, sort, page = 1, limit = 10 } = req.query;
     
@@ -47,7 +47,7 @@ const getProducts = async (req, res) => {
 // @desc    Obtener un producto por ID
 // @route   GET /api/products/:id
 // @access  Public
-const getProductById = async (req, res) => {
+export const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (product) {
@@ -63,7 +63,7 @@ const getProductById = async (req, res) => {
 // @desc    Crear un nuevo producto
 // @route   POST /api/products
 // @access  Private/Admin
-const createProduct = async (req, res) => {
+export const createProduct = async (req, res) => {
   try {
     const product = await Product.create(req.body);
     res.status(201).json(product);
@@ -75,7 +75,7 @@ const createProduct = async (req, res) => {
 // @desc    Actualizar un producto
 // @route   PUT /api/products/:id
 // @access  Private/Admin
-const updateProduct = async (req, res) => {
+export const updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (product) {
@@ -93,7 +93,7 @@ const updateProduct = async (req, res) => {
 // @desc    Eliminar un producto
 // @route   DELETE /api/products/:id
 // @access  Private/Admin
-const deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (product) {
@@ -106,12 +106,4 @@ const deleteProduct = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error al eliminar producto', error: error.message });
   }
-};
-
-module.exports = {
-  getProducts,
-  getProductById,
-  createProduct,
-  updateProduct,
-  deleteProduct
 }; 
