@@ -51,15 +51,12 @@ const imageSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
-  tags: [String],
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  lastAccessed: {
-    type: Date,
-    default: Date.now
+  active: {
+    type: Boolean,
+    default: true
   }
+}, {
+  timestamps: true
 });
 
 // Actualizar lastAccessed cuando se accede a la imagen
@@ -101,6 +98,4 @@ imageSchema.methods.removeTransformation = async function(transformationId) {
   return this;
 };
 
-const Image = mongoose.model('Image', imageSchema);
-
-export default Image; 
+export default mongoose.model('Image', imageSchema); 

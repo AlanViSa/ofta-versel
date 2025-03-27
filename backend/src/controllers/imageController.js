@@ -1,13 +1,13 @@
-import Image from '../models/imageModel';
-import { imageService } from '../services/imageService';
-const cloudinary = require('../config/cloudinary');
-const { 
+import Image from '../models/imageModel.js';
+import { imageService } from '../services/imageService.js';
+import cloudinary from '../config/cloudinary.js';
+import { 
   generateAllImageUrls, 
   optimizeImage, 
   checkImageExists,
   imageConfigs 
-} = require('../utils/imageUtils');
-const {
+} from '../utils/imageUtils.js';
+import {
   getImageUrlsFromCache,
   setImageUrlsInCache,
   getImageListFromCache,
@@ -15,14 +15,14 @@ const {
   getImageExistsFromCache,
   setImageExistsInCache,
   invalidateImageCache
-} = require('../utils/cacheUtils');
-const { 
+} from '../utils/cacheUtils.js';
+import { 
   applyTransformations, 
   applyEffects, 
   createVariants, 
   applyWatermark,
   transformConfigs 
-} = require('../utils/imageTransformUtils');
+} from '../utils/imageTransformUtils.js';
 
 // Constantes para validaciones
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -31,7 +31,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 // @desc    Subir una imagen
 // @route   POST /api/images/upload
 // @access  Private
-const uploadImage = async (req, res, next) => {
+export const uploadImage = async (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ 
@@ -49,40 +49,76 @@ const uploadImage = async (req, res, next) => {
     // Validación de tamaño
     if (req.file.size > MAX_FILE_SIZE) {
       return res.status(400).json({ 
-        error: 'El archivo excede el tamaño máximo permitido (5MB)' 
+        error: 'El archivo es demasiado grande. El tamaño máximo permitido es 5MB' 
       });
     }
 
-    const image = await imageService.uploadImage(req.file);
-    res.status(201).json(image);
+    // Optimizar imagen antes de subir
+    const optimizedImage = await optimizeImage(req.file.buffer, req.file.mimetype);
+    
+    // Subir a Cloudinary
+    const result = await cloudinary.uploader.upload(optimizedImage, {
+      resource_type: 'auto',
+      folder: 'oftalmologia'
+    });
+
+    // Crear registro en la base de datos
+    const image = await Image.create({
+      publicId: result.public_id,
+      url: result.secure_url,
+      format: result.format,
+      width: result.width,
+      height: result.height,
+      size: result.bytes,
+      uploadedBy: req.user._id
+    });
+
+    // Generar URLs de todas las variantes
+    const imageUrls = await generateAllImageUrls(image.publicId, image.format);
+
+    // Guardar en caché
+    await setImageUrlsInCache(image.publicId, imageUrls);
+
+    res.status(201).json({
+      success: true,
+      data: {
+        image,
+        urls: imageUrls
+      }
+    });
   } catch (error) {
     next(error);
   }
 };
 
 // @desc    Eliminar una imagen
-// @route   DELETE /api/images/:id
+// @route   DELETE /api/images/:filename
 // @access  Private
-const deleteImage = async (req, res, next) => {
+export const deleteImage = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { filename } = req.params;
+    const image = await Image.findOne({ publicId: filename });
 
-    if (!id) {
-      return res.status(400).json({ 
-        error: 'Se requiere el ID de la imagen' 
-      });
+    if (!image) {
+      return res.status(404).json({ error: 'Imagen no encontrada' });
     }
 
-    await imageService.deleteImage(id);
-    res.status(200).json({ 
-      message: 'Imagen eliminada correctamente' 
-    });
+    // Verificar permisos
+    if (image.uploadedBy.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+      return res.status(403).json({ error: 'No autorizado para eliminar esta imagen' });
+    }
+
+    // Eliminar de Cloudinary
+    await cloudinary.uploader.destroy(filename);
+
+    // Eliminar de la base de datos
+    await image.deleteOne();
+
+    // Invalidar caché
+    await invalidateImageCache(filename);
+
+    res.json({ success: true, message: 'Imagen eliminada correctamente' });
   } catch (error) {
-    if (error.message === 'Image not found') {
-      return res.status(404).json({ 
-        error: 'Imagen no encontrada' 
-      });
-    }
     next(error);
   }
 };
@@ -90,65 +126,50 @@ const deleteImage = async (req, res, next) => {
 // @desc    Obtener todas las imágenes
 // @route   GET /api/images
 // @access  Private
-const getAllImages = async (req, res, next) => {
+export const getImages = async (req, res, next) => {
   try {
-    const images = await imageService.getAllImages();
-    res.status(200).json(images);
+    // Intentar obtener de caché
+    const cachedImages = await getImageListFromCache();
+    if (cachedImages) {
+      return res.json({ success: true, data: cachedImages });
+    }
+
+    // Si no está en caché, obtener de la base de datos
+    const images = await Image.find({ active: true })
+      .select('publicId url format width height size createdAt')
+      .sort('-createdAt');
+
+    // Guardar en caché
+    await setImageListInCache(images);
+
+    res.json({ success: true, data: images });
   } catch (error) {
     next(error);
   }
 };
 
 // @desc    Transformar una imagen
-// @route   POST /api/images/:id/transform
+// @route   POST /api/images/:publicId/transform
 // @access  Private
-const transformImage = async (req, res, next) => {
+export const transformImage = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const transformations = req.body;
+    const { publicId } = req.params;
+    const { transformations } = req.body;
 
-    if (!id) {
-      return res.status(400).json({ 
-        error: 'Se requiere el ID de la imagen' 
-      });
+    // Verificar si la imagen existe
+    const exists = await checkImageExists(publicId);
+    if (!exists) {
+      return res.status(404).json({ error: 'Imagen no encontrada' });
     }
 
-    // Validar que solo se incluyan transformaciones permitidas
-    const allowedTransformations = ['width', 'height'];
-    const receivedTransformations = Object.keys(transformations);
-    
-    const invalidTransformations = receivedTransformations.filter(
-      key => !allowedTransformations.includes(key)
-    );
+    // Aplicar transformaciones
+    const result = await applyTransformations(publicId, transformations);
 
-    if (invalidTransformations.length > 0) {
-      return res.status(400).json({ 
-        error: 'Solo se permiten transformaciones de ancho y alto',
-        invalidTransformations 
-      });
-    }
-
-    // Validar que los valores sean números positivos
-    if (transformations.width && (isNaN(transformations.width) || transformations.width <= 0)) {
-      return res.status(400).json({ 
-        error: 'El ancho debe ser un número positivo' 
-      });
-    }
-
-    if (transformations.height && (isNaN(transformations.height) || transformations.height <= 0)) {
-      return res.status(400).json({ 
-        error: 'El alto debe ser un número positivo' 
-      });
-    }
-
-    const result = await imageService.transformImage(id, transformations);
-    res.status(200).json(result);
+    res.json({
+      success: true,
+      data: result
+    });
   } catch (error) {
-    if (error.message === 'Image not found') {
-      return res.status(404).json({ 
-        error: 'Imagen no encontrada' 
-      });
-    }
     next(error);
   }
 };
@@ -156,96 +177,64 @@ const transformImage = async (req, res, next) => {
 // @desc    Aplicar efectos a una imagen
 // @route   POST /api/images/:publicId/effects
 // @access  Private
-const applyImageEffects = async (req, res) => {
+export const applyImageEffects = async (req, res) => {
   try {
     const { publicId } = req.params;
     const { effects } = req.body;
 
-    const transformedUrl = await applyEffects(publicId, effects);
-    res.json({ url: transformedUrl });
+    const result = await applyEffects(publicId, effects);
+    res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
 // @desc    Crear variantes de una imagen
 // @route   POST /api/images/:publicId/variants
 // @access  Private
-const createImageVariants = async (req, res) => {
+export const createImageVariants = async (req, res) => {
   try {
     const { publicId } = req.params;
     const { variants } = req.body;
 
-    const urls = await createVariants(publicId, variants);
-    res.json({ urls });
+    const result = await createVariants(publicId, variants);
+    res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
-// @desc    Aplicar marca de agua a una imagen
+// @desc    Agregar marca de agua a una imagen
 // @route   POST /api/images/:publicId/watermark
 // @access  Private
-const addWatermark = async (req, res) => {
+export const addWatermark = async (req, res) => {
   try {
     const { publicId } = req.params;
-    const { text, options } = req.body;
+    const { watermark } = req.body;
 
-    const watermarkedUrl = await applyWatermark(publicId, text, options);
-    res.json({ url: watermarkedUrl });
+    const result = await applyWatermark(publicId, watermark);
+    res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
-// @desc    Obtener configuraciones de transformación disponibles
+// @desc    Obtener configuraciones de transformación
 // @route   GET /api/images/transform-configs
 // @access  Private
-const getTransformationConfigs = (req, res) => {
-  const configs = imageService.getTransformationConfigs();
-  res.status(200).json(configs);
-};
-
-// @desc    Obtener URLs optimizadas de una imagen
-// @route   GET /api/images/:publicId/urls
-// @access  Public
-const getImageUrls = async (req, res) => {
-  try {
-    const { publicId } = req.params;
-
-    // Intentar obtener del caché
-    const cachedUrls = getImageUrlsFromCache(publicId);
-    if (cachedUrls) {
-      return res.json(cachedUrls);
-    }
-
-    // Verificar si la imagen existe
-    const imageExists = await checkImageExists(publicId);
-    if (!imageExists) {
-      return res.status(404).json({ message: 'Imagen no encontrada' });
-    }
-
-    // Generar URLs y guardar en caché
-    const urls = generateAllImageUrls(publicId);
-    setImageUrlsInCache(publicId, urls);
-    setImageExistsInCache(publicId, true);
-
-    res.json(urls);
-  } catch (error) {
-    res.status(500).json({ message: 'Error al obtener URLs de la imagen', error: error.message });
-  }
+export const getTransformConfigs = (req, res) => {
+  res.json({ success: true, data: transformConfigs });
 };
 
 const imageController = {
   uploadImage,
   deleteImage,
-  getAllImages,
+  getImages,
   transformImage,
-  getImageUrls,
   applyImageEffects,
   createImageVariants,
   addWatermark,
-  getTransformationConfigs
+  getTransformConfigs
 };
 
 export default imageController; 
