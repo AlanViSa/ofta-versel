@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const appointmentSchema = new mongoose.Schema({
   patient: {
@@ -33,14 +33,21 @@ const appointmentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pendiente', 'confirmada', 'cancelada', 'completada'],
-    default: 'pendiente'
+    enum: ['pending', 'confirmed', 'cancelled', 'completed'],
+    default: 'pending'
   },
   notes: {
     type: String,
     trim: true
   },
   createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  cancelledAt: {
+    type: Date
+  },
+  cancelledBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }
@@ -51,8 +58,8 @@ const appointmentSchema = new mongoose.Schema({
 // Índices para mejorar el rendimiento de las búsquedas
 appointmentSchema.index({ date: 1 });
 appointmentSchema.index({ status: 1 });
-appointmentSchema.index({ 'patient.email': 1 });
+appointmentSchema.index({ createdBy: 1 });
 
 const Appointment = mongoose.model('Appointment', appointmentSchema);
 
-module.exports = Appointment; 
+export default Appointment; 

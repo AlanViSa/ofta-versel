@@ -1,9 +1,9 @@
-const Appointment = require('../models/Appointment');
+import Appointment from '../models/Appointment.js';
 
 // @desc    Crear una nueva cita
 // @route   POST /api/appointments
 // @access  Public
-const createAppointment = async (req, res) => {
+export const createAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.create({
       ...req.body,
@@ -18,7 +18,7 @@ const createAppointment = async (req, res) => {
 // @desc    Obtener todas las citas (con filtros)
 // @route   GET /api/appointments
 // @access  Private
-const getAppointments = async (req, res) => {
+export const getAppointments = async (req, res) => {
   try {
     const { date, status, type } = req.query;
     
@@ -46,7 +46,7 @@ const getAppointments = async (req, res) => {
 // @desc    Obtener una cita por ID
 // @route   GET /api/appointments/:id
 // @access  Private
-const getAppointmentById = async (req, res) => {
+export const getAppointmentById = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
       .populate('createdBy', 'name email');
@@ -56,8 +56,7 @@ const getAppointmentById = async (req, res) => {
     }
 
     // Verificar permisos
-    if (req.user && req.user.role !== 'admin' && 
-        appointment.createdBy.toString() !== req.user._id.toString()) {
+    if (req.user && req.user.role !== 'admin' && appointment.createdBy._id.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'No autorizado' });
     }
 
@@ -70,7 +69,7 @@ const getAppointmentById = async (req, res) => {
 // @desc    Actualizar una cita
 // @route   PUT /api/appointments/:id
 // @access  Private
-const updateAppointment = async (req, res) => {
+export const updateAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
 
@@ -79,12 +78,18 @@ const updateAppointment = async (req, res) => {
     }
 
     // Verificar permisos
-    if (req.user && req.user.role !== 'admin' && 
-        appointment.createdBy.toString() !== req.user._id.toString()) {
+    if (req.user && req.user.role !== 'admin' && appointment.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'No autorizado' });
     }
 
-    Object.assign(appointment, req.body);
+    // Actualizar campos permitidos
+    const allowedUpdates = ['date', 'time', 'type', 'notes', 'status'];
+    allowedUpdates.forEach(update => {
+      if (req.body[update] !== undefined) {
+        appointment[update] = req.body[update];
+      }
+    });
+
     const updatedAppointment = await appointment.save();
     res.json(updatedAppointment);
   } catch (error) {
@@ -95,7 +100,7 @@ const updateAppointment = async (req, res) => {
 // @desc    Cancelar una cita
 // @route   PUT /api/appointments/:id/cancel
 // @access  Private
-const cancelAppointment = async (req, res) => {
+export const cancelAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
 
@@ -104,23 +109,22 @@ const cancelAppointment = async (req, res) => {
     }
 
     // Verificar permisos
-    if (req.user && req.user.role !== 'admin' && 
-        appointment.createdBy.toString() !== req.user._id.toString()) {
+    if (req.user && req.user.role !== 'admin' && appointment.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'No autorizado' });
     }
 
-    appointment.status = 'cancelada';
-    await appointment.save();
-    res.json({ message: 'Cita cancelada exitosamente' });
+    // Solo se pueden cancelar citas pendientes
+    if (appointment.status !== 'pending') {
+      return res.status(400).json({ message: 'Solo se pueden cancelar citas pendientes' });
+    }
+
+    appointment.status = 'cancelled';
+    appointment.cancelledAt = Date.now();
+    appointment.cancelledBy = req.user._id;
+
+    const updatedAppointment = await appointment.save();
+    res.json(updatedAppointment);
   } catch (error) {
     res.status(500).json({ message: 'Error al cancelar cita', error: error.message });
   }
-};
-
-module.exports = {
-  createAppointment,
-  getAppointments,
-  getAppointmentById,
-  updateAppointment,
-  cancelAppointment
 }; 
