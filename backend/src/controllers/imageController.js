@@ -191,7 +191,7 @@ export const applyImageEffects = async (req, res) => {
 // @desc    Crear variantes de una imagen
 // @route   POST /api/images/:publicId/variants
 // @access  Private
-export const createImageVariants = async (req, res) => {
+const createImageVariants = async (req, res) => {
   try {
     const { publicId } = req.params;
     const { variants } = req.body;
