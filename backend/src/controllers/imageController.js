@@ -225,7 +225,7 @@ export const getTransformConfigs = (req, res) => {
   res.json({ success: true, data: transformConfigs });
 };
 
-const imageController = {
+export {
   uploadImage,
   deleteImage,
   getImages,
@@ -234,6 +234,4 @@ const imageController = {
   createImageVariants,
   addWatermark,
   getTransformConfigs
-};
-
-export default imageController; 
+}; 

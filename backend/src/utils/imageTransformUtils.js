@@ -198,21 +198,6 @@ export const applyEffect = (params) => {
   return transformConfigs.effects[effect]?.(value) || {};
 };
 
-export const addWatermark = (params) => {
-  const { text, options } = params;
-  return {
-    overlay: {
-      font_family: options?.fontFamily || 'Arial',
-      font_size: options?.fontSize || 50,
-      text
-    },
-    color: options?.color || 'white',
-    opacity: options?.opacity || 70,
-    x: options?.position?.x || 10,
-    y: options?.position?.y || 10
-  };
-};
-
 export const getTransformationString = (transformations) => {
   const mapping = {
     width: 'w',
