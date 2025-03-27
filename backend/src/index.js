@@ -43,10 +43,18 @@ app.use('/api', routes);
 app.use(notFound);
 app.use(errorHandler);
 
+// Opciones de conexión a MongoDB
+const mongooseOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+};
+
 // Conexión a MongoDB
-mongoose.connect(config.mongodbUri)
+mongoose.connect(config.mongodbUri, mongooseOptions)
   .then(() => {
-    console.log('Connected to MongoDB');
+    console.log('Connected to MongoDB successfully');
     
     // Inicializar el programador de tareas
     initializeScheduler();
@@ -63,12 +71,12 @@ mongoose.connect(config.mongodbUri)
     });
 
     // Iniciar servidor
-    const PORT = process.env.PORT || 5000;
+    const PORT = config.port;
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
   .catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
+    console.error('Error connecting to MongoDB:', error.message);
     process.exit(1);
   }); 

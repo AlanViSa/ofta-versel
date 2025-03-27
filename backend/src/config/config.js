@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 export const config = {
   port: process.env.PORT || 5000,
-  mongodbUri: process.env.MONGODB_URI,
+  mongodbUri: process.env.MONGODB_URI || 'mongodb+srv://alantradennials:GzVlGGldfFsZHuZv@cluster0.knf7e4i.mongodb.net/oftalmologia?retryWrites=true&w=majority',
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
   cloudinary: {
@@ -21,7 +21,6 @@ export const config = {
 
 // Validar variables de entorno requeridas
 const requiredEnvVars = [
-  'MONGODB_URI',
   'JWT_SECRET',
   'CLOUDINARY_CLOUD_NAME',
   'CLOUDINARY_API_KEY',
