@@ -1,14 +1,14 @@
-const {
+import {
   findUnusedImages,
   deleteUnusedImages,
   getImageUsageStats
-} = require('../utils/cleanupUtils');
-const { clearCache } = require('../utils/cacheUtils');
+} from '../utils/cleanupUtils.js';
+import { clearCache } from '../utils/cacheUtils.js';
 
 // @desc    Obtener estadísticas de uso de imágenes
 // @route   GET /api/cleanup/stats
 // @access  Private/Admin
-const getStats = async (req, res) => {
+export const getStats = async (req, res) => {
   try {
     const stats = await getImageUsageStats();
     res.json(stats);
@@ -23,7 +23,7 @@ const getStats = async (req, res) => {
 // @desc    Encontrar imágenes no utilizadas
 // @route   GET /api/cleanup/unused
 // @access  Private/Admin
-const findUnused = async (req, res) => {
+export const findUnused = async (req, res) => {
   try {
     const unusedImages = await findUnusedImages();
     res.json({
@@ -46,7 +46,7 @@ const findUnused = async (req, res) => {
 // @desc    Eliminar imágenes no utilizadas
 // @route   POST /api/cleanup/delete-unused
 // @access  Private/Admin
-const deleteUnused = async (req, res) => {
+export const deleteUnused = async (req, res) => {
   try {
     const result = await deleteUnusedImages();
     
@@ -68,7 +68,7 @@ const deleteUnused = async (req, res) => {
 // @desc    Ejecutar limpieza completa
 // @route   POST /api/cleanup/full
 // @access  Private/Admin
-const runFullCleanup = async (req, res) => {
+export const runFullCleanup = async (req, res) => {
   try {
     // Obtener estadísticas iniciales
     const initialStats = await getImageUsageStats();
@@ -98,11 +98,4 @@ const runFullCleanup = async (req, res) => {
       error: error.message 
     });
   }
-};
-
-module.exports = {
-  getStats,
-  findUnused,
-  deleteUnused,
-  runFullCleanup
 }; 

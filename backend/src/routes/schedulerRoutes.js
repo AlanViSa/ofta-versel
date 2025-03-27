@@ -1,11 +1,12 @@
-const express = require('express');
-const router = express.Router();
-const { 
+import express from 'express';
+import { 
   getStatus, 
   updateTaskStatus, 
   runTask 
-} = require('../controllers/schedulerController');
-const { protect, admin } = require('../middleware/authMiddleware');
+} from '../controllers/schedulerController.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
+
+const router = express.Router();
 
 // Todas las rutas requieren autenticación y privilegios de administrador
 router.use(protect, admin);
@@ -15,4 +16,4 @@ router.get('/status', getStatus);
 router.put('/tasks/:taskName', updateTaskStatus);
 router.post('/tasks/:taskName/run', runTask);
 
-module.exports = router; 
+export default router; 

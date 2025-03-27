@@ -1,4 +1,4 @@
-const NodeCache = require('node-cache');
+import NodeCache from 'node-cache';
 
 // Crear instancia de caché con tiempo de expiración de 1 hora
 const imageCache = new NodeCache({ stdTTL: 3600 });
@@ -11,71 +11,57 @@ const CACHE_KEYS = {
 };
 
 // @desc    Obtener datos del caché
-const getFromCache = (key) => {
+export const getFromCache = (key) => {
   return imageCache.get(key);
 };
 
 // @desc    Guardar datos en el caché
-const setInCache = (key, value, ttl = 3600) => {
+export const setInCache = (key, value, ttl = 3600) => {
   return imageCache.set(key, value, ttl);
 };
 
 // @desc    Eliminar datos del caché
-const removeFromCache = (key) => {
+export const removeFromCache = (key) => {
   return imageCache.del(key);
 };
 
 // @desc    Limpiar todo el caché
-const clearCache = () => {
+export const clearCache = () => {
   return imageCache.flushAll();
 };
 
 // @desc    Obtener URLs de imagen del caché
-const getImageUrlsFromCache = (publicId) => {
+export const getImageUrlsFromCache = (publicId) => {
   return getFromCache(CACHE_KEYS.IMAGE_URLS(publicId));
 };
 
 // @desc    Guardar URLs de imagen en el caché
-const setImageUrlsInCache = (publicId, urls) => {
+export const setImageUrlsInCache = (publicId, urls) => {
   return setInCache(CACHE_KEYS.IMAGE_URLS(publicId), urls);
 };
 
 // @desc    Obtener lista de imágenes del caché
-const getImageListFromCache = () => {
+export const getImageListFromCache = () => {
   return getFromCache(CACHE_KEYS.IMAGE_LIST);
 };
 
 // @desc    Guardar lista de imágenes en el caché
-const setImageListInCache = (images) => {
+export const setImageListInCache = (images) => {
   return setInCache(CACHE_KEYS.IMAGE_LIST, images);
 };
 
 // @desc    Verificar si una imagen existe en el caché
-const getImageExistsFromCache = (publicId) => {
+export const getImageExistsFromCache = (publicId) => {
   return getFromCache(CACHE_KEYS.IMAGE_EXISTS(publicId));
 };
 
 // @desc    Guardar estado de existencia de imagen en el caché
-const setImageExistsInCache = (publicId, exists) => {
+export const setImageExistsInCache = (publicId, exists) => {
   return setInCache(CACHE_KEYS.IMAGE_EXISTS(publicId), exists, 3600);
 };
 
 // @desc    Invalidar caché de una imagen
-const invalidateImageCache = (publicId) => {
+export const invalidateImageCache = (publicId) => {
   removeFromCache(CACHE_KEYS.IMAGE_URLS(publicId));
   removeFromCache(CACHE_KEYS.IMAGE_EXISTS(publicId));
-};
-
-module.exports = {
-  getFromCache,
-  setInCache,
-  removeFromCache,
-  clearCache,
-  getImageUrlsFromCache,
-  setImageUrlsInCache,
-  getImageListFromCache,
-  setImageListInCache,
-  getImageExistsFromCache,
-  setImageExistsInCache,
-  invalidateImageCache
 }; 

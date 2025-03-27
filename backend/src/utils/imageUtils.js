@@ -1,4 +1,4 @@
-const cloudinary = require('../config/cloudinary');
+import cloudinary from '../config/cloudinary.js';
 
 // Configuraciones predefinidas para diferentes tipos de imágenes
 const imageConfigs = {
@@ -30,13 +30,13 @@ const imageConfigs = {
 };
 
 // @desc    Generar URL optimizada para una imagen
-const generateOptimizedUrl = (publicId, config = 'product') => {
+export const generateOptimizedUrl = (publicId, config = 'product') => {
   const options = imageConfigs[config] || imageConfigs.product;
   return cloudinary.url(publicId, options);
 };
 
 // @desc    Generar URLs para todos los tamaños de una imagen
-const generateAllImageUrls = (publicId) => {
+export const generateAllImageUrls = (publicId) => {
   return {
     thumbnail: generateOptimizedUrl(publicId, 'thumbnail'),
     product: generateOptimizedUrl(publicId, 'product'),
@@ -46,7 +46,7 @@ const generateAllImageUrls = (publicId) => {
 };
 
 // @desc    Optimizar imagen existente
-const optimizeImage = async (publicId, options = {}) => {
+export const optimizeImage = async (publicId, options = {}) => {
   try {
     const result = await cloudinary.uploader.explicit(publicId, {
       type: 'upload',
@@ -58,20 +58,41 @@ const optimizeImage = async (publicId, options = {}) => {
   }
 };
 
-// @desc    Verificar si una imagen existe
-const checkImageExists = async (publicId) => {
+// @desc    Verificar si una imagen existe en Cloudinary
+export const checkImageExists = async (publicId) => {
   try {
     const result = await cloudinary.api.resource(publicId);
     return result;
   } catch (error) {
-    return null;
+    if (error.message.includes('No such file')) {
+      return null;
+    }
+    throw error;
   }
 };
 
-module.exports = {
-  generateOptimizedUrl,
-  generateAllImageUrls,
-  optimizeImage,
-  checkImageExists,
-  imageConfigs
+// @desc    Aplicar transformaciones a una imagen
+export const applyTransformations = async (publicId, transformations) => {
+  try {
+    const result = await cloudinary.uploader.explicit(publicId, {
+      type: 'upload',
+      transformation: transformations
+    });
+    return result;
+  } catch (error) {
+    throw new Error(`Error al aplicar transformaciones: ${error.message}`);
+  }
+};
+
+// @desc    Aplicar efectos a una imagen
+export const applyEffects = async (publicId, effects) => {
+  try {
+    const result = await cloudinary.uploader.explicit(publicId, {
+      type: 'upload',
+      effect: effects
+    });
+    return result;
+  } catch (error) {
+    throw new Error(`Error al aplicar efectos: ${error.message}`);
+  }
 }; 

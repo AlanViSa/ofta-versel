@@ -1,11 +1,11 @@
-const { tasks, toggleTask } = require('../config/scheduler');
-const { deleteUnusedImages, getImageUsageStats } = require('../utils/cleanupUtils');
-const { clearCache } = require('../utils/cacheUtils');
+import { tasks, toggleTask } from '../config/scheduler.js';
+import { deleteUnusedImages, getImageUsageStats } from '../utils/cleanupUtils.js';
+import { clearCache } from '../utils/cacheUtils.js';
 
 // @desc    Obtener estado de las tareas programadas
 // @route   GET /api/scheduler/status
 // @access  Private/Admin
-const getStatus = async (req, res) => {
+export const getStatus = async (req, res) => {
   try {
     const status = Object.entries(tasks).map(([name, task]) => ({
       name,
@@ -27,7 +27,7 @@ const getStatus = async (req, res) => {
 // @desc    Habilitar/deshabilitar tarea
 // @route   PUT /api/scheduler/tasks/:taskName
 // @access  Private/Admin
-const updateTaskStatus = async (req, res) => {
+export const updateTaskStatus = async (req, res) => {
   try {
     const { taskName } = req.params;
     const { enabled } = req.body;
@@ -60,7 +60,7 @@ const updateTaskStatus = async (req, res) => {
 // @desc    Ejecutar tarea manualmente
 // @route   POST /api/scheduler/tasks/:taskName/run
 // @access  Private/Admin
-const runTask = async (req, res) => {
+export const runTask = async (req, res) => {
   try {
     const { taskName } = req.params;
 
@@ -133,10 +133,4 @@ const getNextRunTime = (cronExpression) => {
   }
 
   return nextRun.toISOString();
-};
-
-module.exports = {
-  getStatus,
-  updateTaskStatus,
-  runTask
 }; 

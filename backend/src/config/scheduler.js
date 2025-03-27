@@ -1,10 +1,10 @@
-const cron = require('node-cron');
-const { deleteUnusedImages, getImageUsageStats } = require('../utils/cleanupUtils');
-const { clearCache } = require('../utils/cacheUtils');
-const { notifyAdmins } = require('./notifications');
+import cron from 'node-cron';
+import { deleteUnusedImages, getImageUsageStats } from '../utils/cleanupUtils.js';
+import { clearCache } from '../utils/cacheUtils.js';
+import { notifyAdmins } from './notifications.js';
 
 // Configuración de tareas programadas
-const tasks = {
+export const tasks = {
   // Limpieza diaria a las 3 AM
   dailyCleanup: {
     schedule: '0 3 * * *',
@@ -88,7 +88,7 @@ const checkStats = async () => {
 };
 
 // Inicializar tareas programadas
-const initializeScheduler = () => {
+export const initializeScheduler = () => {
   // Limpieza diaria
   if (tasks.dailyCleanup.enabled) {
     cron.schedule(tasks.dailyCleanup.schedule, runDailyCleanup);
@@ -111,7 +111,7 @@ const initializeScheduler = () => {
 };
 
 // Función para habilitar/deshabilitar tareas
-const toggleTask = async (taskName, enabled) => {
+export const toggleTask = async (taskName, enabled) => {
   if (tasks[taskName]) {
     tasks[taskName].enabled = enabled;
     console.log(`Tarea ${taskName} ${enabled ? 'habilitada' : 'deshabilitada'}`);
@@ -119,10 +119,4 @@ const toggleTask = async (taskName, enabled) => {
     // Notificar cambio de estado
     await notifyAdmins('taskStatus', taskName, enabled);
   }
-};
-
-module.exports = {
-  initializeScheduler,
-  toggleTask,
-  tasks
 }; 

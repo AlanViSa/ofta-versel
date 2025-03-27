@@ -1,10 +1,10 @@
-const cloudinary = require('../config/cloudinary');
-const mongoose = require('mongoose');
-const Product = require('../models/Product');
-const Appointment = require('../models/Appointment');
+import cloudinary from '../config/cloudinary.js';
+import mongoose from 'mongoose';
+import Product from '../models/Product.js';
+import Appointment from '../models/Appointment.js';
 
 // @desc    Obtener todas las imágenes de Cloudinary
-const getAllCloudinaryImages = async () => {
+export const getAllCloudinaryImages = async () => {
   try {
     const result = await cloudinary.search
       .expression('folder:ofta/*')
@@ -16,7 +16,7 @@ const getAllCloudinaryImages = async () => {
 };
 
 // @desc    Obtener todas las referencias a imágenes en la base de datos
-const getImageReferences = async () => {
+export const getImageReferences = async () => {
   try {
     // Obtener imágenes de productos
     const products = await Product.find({}, 'images');
@@ -34,7 +34,7 @@ const getImageReferences = async () => {
 };
 
 // @desc    Encontrar imágenes no utilizadas
-const findUnusedImages = async () => {
+export const findUnusedImages = async () => {
   try {
     const cloudinaryImages = await getAllCloudinaryImages();
     const usedImages = await getImageReferences();
@@ -48,7 +48,7 @@ const findUnusedImages = async () => {
 };
 
 // @desc    Eliminar imágenes no utilizadas
-const deleteUnusedImages = async () => {
+export const deleteUnusedImages = async () => {
   try {
     const unusedImages = await findUnusedImages();
     const deletedImages = [];
@@ -68,7 +68,7 @@ const deleteUnusedImages = async () => {
 };
 
 // @desc    Obtener estadísticas de uso de imágenes
-const getImageUsageStats = async () => {
+export const getImageUsageStats = async () => {
   try {
     const cloudinaryImages = await getAllCloudinaryImages();
     const usedImages = await getImageReferences();
@@ -87,12 +87,4 @@ const getImageUsageStats = async () => {
   } catch (error) {
     throw new Error(`Error al obtener estadísticas: ${error.message}`);
   }
-};
-
-module.exports = {
-  getAllCloudinaryImages,
-  getImageReferences,
-  findUnusedImages,
-  deleteUnusedImages,
-  getImageUsageStats
 }; 

@@ -1,6 +1,6 @@
-require('dotenv').config();
+import 'dotenv/config';
 
-const config = {
+export const config = {
   port: process.env.PORT || 5000,
   mongodbUri: process.env.MONGODB_URI,
   jwtSecret: process.env.JWT_SECRET,
@@ -34,6 +34,4 @@ const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
   throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
-}
-
-module.exports = config; 
+} 

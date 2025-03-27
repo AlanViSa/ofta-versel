@@ -1,12 +1,13 @@
-const express = require('express');
-const router = express.Router();
-const { 
+import express from 'express';
+import { 
   getStats, 
   findUnused, 
   deleteUnused, 
   runFullCleanup 
-} = require('../controllers/cleanupController');
-const { protect, admin } = require('../middleware/authMiddleware');
+} from '../controllers/cleanupController.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
+
+const router = express.Router();
 
 // Todas las rutas requieren autenticación y privilegios de administrador
 router.use(protect, admin);
@@ -17,4 +18,4 @@ router.get('/unused', findUnused);
 router.post('/delete-unused', deleteUnused);
 router.post('/full', runFullCleanup);
 
-module.exports = router; 
+export default router; 

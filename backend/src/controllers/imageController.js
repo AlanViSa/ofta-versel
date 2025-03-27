@@ -4,8 +4,7 @@ import cloudinary from '../config/cloudinary.js';
 import { 
   generateAllImageUrls, 
   optimizeImage, 
-  checkImageExists,
-  imageConfigs 
+  checkImageExists
 } from '../utils/imageUtils.js';
 import {
   getImageUrlsFromCache,
@@ -18,7 +17,7 @@ import {
 } from '../utils/cacheUtils.js';
 import { 
   applyTransformations, 
-  applyEffects, 
+  applyEffects,
   createVariants, 
   applyWatermark,
   transformConfigs 

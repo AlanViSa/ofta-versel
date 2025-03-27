@@ -1,7 +1,7 @@
-const multer = require('multer');
-const path = require('path');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('../config/cloudinary');
+import multer from 'multer';
+import path from 'path';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import cloudinary from '../config/cloudinary.js';
 
 // Configuración de almacenamiento en Cloudinary
 const storage = new CloudinaryStorage({
@@ -24,7 +24,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Configuración de multer
-const upload = multer({
+export const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
@@ -33,7 +33,7 @@ const upload = multer({
 });
 
 // Middleware para manejar errores de multer
-const handleMulterError = (err, req, res, next) => {
+export const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({
@@ -47,9 +47,4 @@ const handleMulterError = (err, req, res, next) => {
     });
   }
   next();
-};
-
-module.exports = {
-  upload,
-  handleMulterError
 }; 

@@ -1,12 +1,12 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+import userRoutes from './userRoutes.js';
+import productRoutes from './productRoutes.js';
+import appointmentRoutes from './appointmentRoutes.js';
+import imageRoutes from './imageRoutes.js';
+import cleanupRoutes from './cleanupRoutes.js';
+import schedulerRoutes from './schedulerRoutes.js';
 
-const userRoutes = require('./userRoutes');
-const productRoutes = require('./productRoutes');
-const appointmentRoutes = require('./appointmentRoutes');
-const imageRoutes = require('./imageRoutes');
-const cleanupRoutes = require('./cleanupRoutes');
-const schedulerRoutes = require('./schedulerRoutes');
+const router = express.Router();
 
 // Rutas base
 router.use('/users', userRoutes);
@@ -21,4 +21,4 @@ router.get('/test', (req, res) => {
   res.json({ message: 'API funcionando correctamente' });
 });
 
-module.exports = router; 
+export default router; 

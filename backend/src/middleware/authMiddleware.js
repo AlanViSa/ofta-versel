@@ -53,10 +53,4 @@ export const isOwnerOrAdmin = (req, res, next) => {
       message: 'No autorizado, solo el propietario o administradores'
     });
   }
-};
-
-export default {
-  protect,
-  admin,
-  isOwnerOrAdmin
 }; 

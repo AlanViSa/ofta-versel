@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
 // Configuración del transportador de correo
 const transporter = nodemailer.createTransport({
@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Plantillas de correo
-const emailTemplates = {
+export const emailTemplates = {
   storageAlert: (stats) => ({
     subject: 'Alerta de Almacenamiento de Imágenes',
     html: `
@@ -52,7 +52,7 @@ const emailTemplates = {
 };
 
 // Función para enviar correo
-const sendEmail = async (to, template, data) => {
+export const sendEmail = async (to, template, data) => {
   try {
     const mailOptions = {
       from: process.env.SMTP_FROM,
@@ -69,7 +69,7 @@ const sendEmail = async (to, template, data) => {
 };
 
 // Función para enviar notificación a administradores
-const notifyAdmins = async (template, data) => {
+export const notifyAdmins = async (template, data) => {
   try {
     const adminEmails = process.env.ADMIN_EMAILS.split(',');
     await Promise.all(adminEmails.map(email => sendEmail(email, template, data)));
@@ -77,10 +77,4 @@ const notifyAdmins = async (template, data) => {
     console.error('Error al enviar notificaciones a administradores:', error);
     throw error;
   }
-};
-
-module.exports = {
-  sendEmail,
-  notifyAdmins,
-  emailTemplates
 }; 
