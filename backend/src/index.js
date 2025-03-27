@@ -36,19 +36,19 @@ app.use(express.urlencoded({ extended: true }));
 // Servir archivos estáticos
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Rutas
+// Ruta de prueba
+app.get('/', (req, res) => {
+  res.json({ message: 'API is running' });
+});
+
+// Rutas API
 app.use('/api', routes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/images', imageRoutes);
 
-// Ruta de prueba
-app.get('/', (req, res) => {
-  res.json({ message: 'API is running' });
-});
-
-// Manejo de errores
+// Manejo de errores - debe estar después de todas las rutas
 app.use(notFound);
 app.use(errorHandler);
 
