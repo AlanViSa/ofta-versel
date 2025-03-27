@@ -206,7 +206,7 @@ export const createImageVariants = async (req, res) => {
 // @desc    Agregar marca de agua a una imagen
 // @route   POST /api/images/:publicId/watermark
 // @access  Private
-export const addWatermark = async (req, res) => {
+const addWatermark = async (req, res) => {
   try {
     const { publicId } = req.params;
     const { watermark } = req.body;
