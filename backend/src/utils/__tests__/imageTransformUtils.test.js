@@ -1,5 +1,5 @@
-import cloudinary from '../../config/cloudinary';
-import * as imageTransformUtils from '../imageTransformUtils';
+import cloudinary from '../../config/cloudinary.js';
+import * as imageTransformUtils from '../imageTransformUtils.js';
 
 jest.mock('../../config/cloudinary', () => ({
   v2: {

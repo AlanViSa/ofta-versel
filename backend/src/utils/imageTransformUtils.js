@@ -1,4 +1,4 @@
-import cloudinary from '../config/cloudinary';
+import cloudinary from '../config/cloudinary.js';
 
 // Configuraciones predefinidas para diferentes tipos de transformaciones
 export const transformConfigs = {

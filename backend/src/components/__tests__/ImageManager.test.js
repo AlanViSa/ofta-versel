@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ImageManager from '../ImageManager';
-import * as imageService from '../../services/imageService';
+import ImageManager from '../ImageManager.js';
+import * as imageService from '../../services/imageService.js';
 
 // Mock del servicio de imágenes
 jest.mock('../../services/imageService', () => ({

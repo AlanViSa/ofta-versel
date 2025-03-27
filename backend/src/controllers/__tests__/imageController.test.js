@@ -1,5 +1,5 @@
-import imageController from '../../controllers/imageController';
-import { imageService } from '../../services/imageService';
+import imageController from '../../controllers/imageController.js';
+import { imageService } from '../../services/imageService.js';
 
 jest.mock('../../services/imageService', () => ({
   imageService: {

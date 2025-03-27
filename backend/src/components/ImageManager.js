@@ -18,7 +18,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { Add as AddIcon, Refresh as RefreshIcon, Delete as DeleteIcon, Transform as TransformIcon } from '@mui/icons-material';
-import * as imageService from '../services/imageService';
+import * as imageService from '../services/imageService.js';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
