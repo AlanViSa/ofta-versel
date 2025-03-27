@@ -7,6 +7,7 @@ const fs = require('fs');
 const routes = require('./routes');
 const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 const { initializeScheduler } = require('./config/scheduler');
+const config = require('./config/config');
 
 const app = express();
 
@@ -17,7 +18,10 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: config.cors.origin,
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -32,19 +36,33 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Conexión a MongoDB
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(config.mongodbUri)
   .then(() => {
-    console.log('Conexión a MongoDB establecida');
+    console.log('Connected to MongoDB');
     
     // Inicializar el programador de tareas
     initializeScheduler();
     
+    // Rutas
+    app.use('/api/users', require('./routes/userRoutes'));
+    app.use('/api/products', require('./routes/productRoutes'));
+    app.use('/api/appointments', require('./routes/appointmentRoutes'));
+    app.use('/api/images', require('./routes/imageRoutes'));
+    app.use('/api/cleanup', require('./routes/cleanupRoutes'));
+    app.use('/api/scheduler', require('./routes/schedulerRoutes'));
+
+    // Ruta de prueba
+    app.get('/', (req, res) => {
+      res.json({ message: 'API is running' });
+    });
+
     // Iniciar servidor
-    const PORT = process.env.PORT || 5000;
+    const PORT = config.port;
     app.listen(PORT, () => {
-      console.log(`Servidor corriendo en puerto ${PORT}`);
+      console.log(`Server is running on port ${PORT}`);
     });
   })
   .catch((error) => {
-    console.error('Error al conectar con MongoDB:', error);
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
   }); 
