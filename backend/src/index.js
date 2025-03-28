@@ -27,21 +27,11 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Configuración de CORS
 const corsOptions = {
-  origin: function (origin, callback) {
-    const allowedOrigins = [
-      'https://ofta-versel.vercel.app',
-      'http://localhost:5173'
-    ];
-    
-    // Permitir solicitudes sin origen (como las aplicaciones móviles o Postman)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'https://ofta-versel.vercel.app',
+    'https://ofta-versel-50a2ayr2s-alan-villanueva-sanchezs-projects.vercel.app',
+    'http://localhost:5173'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
