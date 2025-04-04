@@ -1,7 +1,18 @@
 const QuienesSomos = () => {
   const scrollToEquipo = () => {
     const equipoSection = document.getElementById('equipo');
-    equipoSection?.scrollIntoView({ behavior: 'smooth' });
+    if (equipoSection) {
+      // Calcular la posición del elemento con un offset menor
+      const offset = 40; // Offset reducido para mejor visibilidad
+      const elementPosition = equipoSection.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      
+      // Desplazamiento suave a la posición ajustada
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
   };
 
   return (

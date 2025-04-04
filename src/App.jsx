@@ -11,6 +11,23 @@ import Footer from './components/Footer.jsx'
 import WhatsAppButton from './components/WhatsAppButton.jsx'
 
 function App() {
+  const scrollToContacto = (e) => {
+    e.preventDefault();
+    const contactoSection = document.getElementById('contacto');
+    if (contactoSection) {
+      // Calcular la posición del elemento con un offset menor para que quede más arriba
+      const offset = 40; // Offset reducido para mejor visibilidad
+      const elementPosition = contactoSection.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      
+      // Desplazamiento suave a la posición ajustada
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+  };
+
   return (
     <div className="bg-light min-h-screen">
       <TopBar />
@@ -44,6 +61,7 @@ function App() {
             <div className="mt-8 flex justify-center">
               <a 
                 href="#contacto"
+                onClick={scrollToContacto}
                 className="px-8 py-4 bg-primary text-white rounded-lg hover:bg-secondary transition-all duration-300 text-lg font-medium transform hover:scale-105 cursor-pointer"
               >
                 Agenda tu consulta

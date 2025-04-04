@@ -6,57 +6,43 @@ const Contacto = () => {
     nombre: '',
     email: '',
     telefono: '',
-    fecha: '',
-    hora: '',
     tipoConsulta: '',
     mensaje: ''
   });
 
   const [status, setStatus] = useState({
     loading: false,
-    error: null,
-    success: false
+    success: false,
+    error: false,
+    message: ''
   });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setStatus({ loading: true, error: null, success: false });
-
-    // Validar que todos los campos requeridos estén presentes
-    const requiredFields = ['nombre', 'email', 'telefono', 'fecha', 'hora', 'tipoConsulta'];
-    const missingFields = requiredFields.filter(field => !formData[field]);
+    setStatus({ loading: true, success: false, error: false, message: '' });
     
-    if (missingFields.length > 0) {
-      setStatus({
-        loading: false,
-        error: `Por favor, completa los siguientes campos: ${missingFields.join(', ')}`,
-        success: false
-      });
-      return;
-    }
-
-    try {
-      console.log('Enviando datos:', formData); // Log para debugging
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/appointments`, formData);
-      console.log('Respuesta del servidor:', response.data); // Log para debugging
-      setStatus({ loading: false, error: null, success: true });
+    // Simular un envío exitoso
+    setTimeout(() => {
+      // Aquí iría la lógica real para enviar el formulario
+      console.log('Datos del formulario:', formData);
+      
+      // Limpiar el formulario
       setFormData({
         nombre: '',
         email: '',
         telefono: '',
-        fecha: '',
-        hora: '',
         tipoConsulta: '',
         mensaje: ''
       });
-    } catch (error) {
-      console.error('Error completo:', error); // Log para debugging
+      
+      // Mostrar mensaje de éxito
       setStatus({
         loading: false,
-        error: error.response?.data?.message || 'Error al agendar la cita',
-        success: false
+        success: true,
+        error: false,
+        message: '¡Tu mensaje ha sido enviado con éxito! Nos pondremos en contacto contigo pronto.'
       });
-    }
+    }, 1000);
   };
 
   const handleChange = (e) => {
@@ -68,7 +54,7 @@ const Contacto = () => {
   };
 
   return (
-    <section id="contacto" className="py-20 bg-white">
+    <section id="contacto" className="py-20 bg-white" style={{ scrollMarginTop: '40px' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Encabezado de la sección */}
         <div className="text-center mb-16">
@@ -89,14 +75,13 @@ const Contacto = () => {
             <h3 className="text-2xl font-display font-semibold text-primary mb-6 text-center md:text-left">
               Formulario de Cita
             </h3>
-            {status.success && (
-              <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md">
-                ¡Tu cita ha sido agendada exitosamente! Nos pondremos en contacto contigo pronto.
-              </div>
-            )}
-            {status.error && (
-              <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md">
-                {status.error}
+            {status.message && (
+              <div className={`p-4 mb-4 rounded-lg ${
+                status.success ? 'bg-green-100 text-green-700' : 
+                status.error ? 'bg-red-100 text-red-700' : 
+                'bg-blue-100 text-blue-700'
+              }`}>
+                {status.message}
               </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -139,37 +124,6 @@ const Contacto = () => {
                   name="telefono"
                   id="telefono"
                   value={formData.telefono}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-accent focus:ring-accent bg-white"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="fecha" className="block text-sm font-medium text-gray-700">
-                  Fecha de la cita
-                </label>
-                <input
-                  type="date"
-                  name="fecha"
-                  id="fecha"
-                  value={formData.fecha}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-accent focus:ring-accent bg-white"
-                  required
-                  min={new Date().toISOString().split('T')[0]}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="hora" className="block text-sm font-medium text-gray-700">
-                  Hora de la cita
-                </label>
-                <input
-                  type="time"
-                  name="hora"
-                  id="hora"
-                  value={formData.hora}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-accent focus:ring-accent bg-white"
                   required

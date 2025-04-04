@@ -69,7 +69,7 @@ const Productos = () => {
   ];
 
   return (
-    <section id="productos" className="py-20 bg-white">
+    <section id="productos" className="py-20 bg-white" style={{ scrollMarginTop: '40px' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Encabezado de la sección */}
         <div className="text-center mb-16">

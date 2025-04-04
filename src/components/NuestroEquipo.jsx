@@ -24,7 +24,7 @@ const NuestroEquipo = () => {
   ]
 
   return (
-    <section id="equipo" className="py-20 bg-light">
+    <section id="equipo" className="py-20 bg-light" style={{ scrollMarginTop: '40px' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Encabezado de la sección */}
         <div className="text-center mb-16">
